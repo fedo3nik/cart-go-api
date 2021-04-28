@@ -23,6 +23,10 @@ type HTTPAddItemHandler struct {
 	cartService service.Cart
 }
 
+type HTTPRemoveItemHandler struct {
+	cartService service.Cart
+}
+
 func handleError(w http.ResponseWriter, err error) *dto.ErrorResponse {
 	if errors.Is(err, e.ErrDB) {
 		w.WriteHeader(http.StatusBadGateway)
@@ -46,6 +50,12 @@ func handleError(w http.ResponseWriter, err error) *dto.ErrorResponse {
 		w.WriteHeader(http.StatusBadRequest)
 
 		return &dto.ErrorResponse{Message: "Product title can't be blank"}
+	}
+
+	if errors.Is(err, e.ErrRemove) {
+		w.WriteHeader(http.StatusBadRequest)
+
+		return &dto.ErrorResponse{Message: "Cart or item with these IDs does not exist"}
 	}
 
 	return nil
@@ -125,6 +135,48 @@ func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp.CartID = item.CartID
 	resp.Product = item.Product
 	resp.Quantity = item.Quantity
+
+	err = json.NewEncoder(w).Encode(&resp)
+	if err != nil {
+		log.Printf("Encode error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+}
+
+func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
+	return &HTTPRemoveItemHandler{cartService: cartService}
+}
+
+func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
+	if err != nil {
+		log.Printf("Strconv err: %v", err)
+		return
+	}
+
+	itemID, err := strconv.Atoi(mux.Vars(r)["itemID"])
+	if err != nil {
+		log.Printf("Strconv err: %v", err)
+		return
+	}
+
+	var resp dto.RemoveItemResponse
+
+	err = hh.cartService.RemoveItem(r.Context(), cartID, itemID)
+	if err != nil {
+		resp := handleError(w, err)
+
+		err = json.NewEncoder(w).Encode(&resp)
+		if err != nil {
+			log.Printf("Encode error: %v", err)
+
+			return
+		}
+
+		return
+	}
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {

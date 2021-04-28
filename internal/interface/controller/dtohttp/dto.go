@@ -19,6 +19,9 @@ type AddItemResponse struct {
 	Quantity int    `json:"quantity"`
 }
 
+type RemoveItemResponse struct {
+}
+
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
