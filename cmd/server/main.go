@@ -31,8 +31,10 @@ func main() {
 	cartService := service.NewCartService(pool)
 
 	createCartHandler := controller.NewHTTPCreateCartHandler(cartService)
+	addItemHandler := controller.NewHTTPAddItemHandler(cartService)
 
 	handler.Handle("/carts", createCartHandler).Methods("POST")
+	handler.Handle("/carts/{cartID}/items", addItemHandler).Methods("POST")
 
 	err = http.ListenAndServe(c.Host+c.Port, handler)
 	if err != nil {
