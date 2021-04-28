@@ -1,5 +1,6 @@
 package models
 
 type Cart struct {
-	ID int
+	ID    int
+	Items []CartItem
 }

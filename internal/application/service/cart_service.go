@@ -13,6 +13,7 @@ type Cart interface {
 	CreateCart(ctx context.Context) (*models.Cart, error)
 	AddItem(ctx context.Context, product string, quantity, cartID int) (*models.CartItem, error)
 	RemoveItem(ctx context.Context, cartID, itemID int) error
+	GetCart(ctx context.Context, cartID int) (*models.Cart, error)
 }
 
 type CartService struct {
@@ -61,6 +62,15 @@ func (c CartService) RemoveItem(ctx context.Context, cartID, itemID int) error {
 	}
 
 	return nil
+}
+
+func (c CartService) GetCart(ctx context.Context, cartID int) (*models.Cart, error) {
+	cart, err := postgres.GetCart(ctx, c.Pool, cartID)
+	if err != nil {
+		return nil, e.ErrInvalidCartID
+	}
+
+	return cart, nil
 }
 
 func NewCartService(pool *pgxpool.Pool) *CartService {

@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/fedo3nik/cart-go-api/internal/domain/models"
@@ -65,12 +64,45 @@ func DeleteItem(ctx context.Context, p *pgxpool.Pool, cartID, itemID int) (bool,
 		return true, err
 	}
 
-	rows := ct.RowsAffected()
-	fmt.Print(rows)
-
 	if ct.RowsAffected() != 1 {
 		return false, nil
 	}
 
 	return true, nil
+}
+
+func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, error) {
+	var items []models.CartItem
+
+	var cart models.Cart
+
+	conn, err := p.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer conn.Release()
+
+	rows, err := conn.Query(ctx, "SELECT id, cartId, product_name, quantity FROM items WHERE cartID=$1", cartID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var item models.CartItem
+
+		err = rows.Scan(&item.ID, &item.CartID, &item.Product, &item.Quantity)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	cart.ID = cartID
+	cart.Items = items
+
+	return &cart, nil
 }

@@ -27,6 +27,10 @@ type HTTPRemoveItemHandler struct {
 	cartService service.Cart
 }
 
+type HTTPGetCartHandler struct {
+	cartService service.Cart
+}
+
 func handleError(w http.ResponseWriter, err error) *dto.ErrorResponse {
 	if errors.Is(err, e.ErrDB) {
 		w.WriteHeader(http.StatusBadGateway)
@@ -66,7 +70,7 @@ func NewHTTPCreateCartHandler(cartService service.Cart) *HTTPCreateCartHandler {
 }
 
 func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var resp dto.CreateCartResponse
+	var resp dto.CartResponse
 
 	cart, err := hh.cartService.CreateCart(r.Context())
 	if err != nil {
@@ -177,6 +181,45 @@ func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 		return
 	}
+
+	err = json.NewEncoder(w).Encode(&resp)
+	if err != nil {
+		log.Printf("Encode error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+}
+
+func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
+	return &HTTPGetCartHandler{cartService: cartService}
+}
+
+func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
+	if err != nil {
+		log.Printf("Strconv err: %v", err)
+		return
+	}
+
+	var resp dto.CartResponse
+
+	cart, err := hh.cartService.GetCart(r.Context(), cartID)
+	if err != nil {
+		handleError(w, err)
+
+		err = json.NewEncoder(w).Encode(&resp)
+		if err != nil {
+			log.Printf("Encode error: %v", err)
+
+			return
+		}
+
+		return
+	}
+
+	resp.ID = cartID
+	resp.Items = cart.Items
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {

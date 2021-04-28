@@ -33,10 +33,12 @@ func main() {
 	createCartHandler := controller.NewHTTPCreateCartHandler(cartService)
 	addItemHandler := controller.NewHTTPAddItemHandler(cartService)
 	removeItemHandler := controller.NewHTTPRemoveItemHandler(cartService)
+	getCartHandler := controller.NewHTTPGetCartHandler(cartService)
 
 	handler.Handle("/carts", createCartHandler).Methods("POST")
 	handler.Handle("/carts/{cartID}/items", addItemHandler).Methods("POST")
 	handler.Handle("/carts/{cartID}/items/{itemID}", removeItemHandler).Methods("DELETE")
+	handler.Handle("/carts/{cartID}", getCartHandler)
 
 	err = http.ListenAndServe(c.Host+c.Port, handler)
 	if err != nil {
