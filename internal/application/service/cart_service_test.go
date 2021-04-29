@@ -2,26 +2,27 @@ package service
 
 import (
 	"context"
+	"log"
+	"testing"
+
 	"github.com/fedo3nik/cart-go-api/internal/config"
 	e "github.com/fedo3nik/cart-go-api/internal/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/stretchr/testify/assert"
-	"log"
-	"testing"
 )
 
 func TestCartService_AddItem(t *testing.T) {
 	tests := []struct {
 		name           string
 		product        string
-		cartId         int
+		cartID         int
 		quantity       int
 		expectedResult string
 		expectedError  error
 	}{
 		{
 			name:           "Add valid item",
-			cartId:         2,
+			cartID:         2,
 			product:        "Test_product",
 			quantity:       5,
 			expectedResult: "Test_product",
@@ -30,7 +31,7 @@ func TestCartService_AddItem(t *testing.T) {
 		{
 			name:           "Invalid product title",
 			product:        "",
-			cartId:         1,
+			cartID:         1,
 			quantity:       1,
 			expectedResult: "",
 			expectedError:  e.ErrInvalidProduct,
@@ -38,7 +39,7 @@ func TestCartService_AddItem(t *testing.T) {
 		{
 			name:           "Invalid quantity",
 			product:        "Shoes",
-			cartId:         1,
+			cartID:         1,
 			quantity:       -1,
 			expectedResult: "",
 			expectedError:  e.ErrInvalidQuantity,
@@ -59,7 +60,7 @@ func TestCartService_AddItem(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			item, err := cs.AddItem(context.Background(), tt.product, tt.quantity, tt.cartId)
+			item, err := cs.AddItem(context.Background(), tt.product, tt.quantity, tt.cartID)
 			if err != nil {
 				assert.Equal(t, tt.expectedError, err)
 				return
@@ -73,20 +74,20 @@ func TestCartService_AddItem(t *testing.T) {
 func TestCartService_RemoveItem(t *testing.T) {
 	tests := []struct {
 		name          string
-		cartId        int
-		itemId        int
+		cartID        int
+		itemID        int
 		expectedError error
 	}{
 		{
-			name:          "Invalid cartId",
-			cartId:        -1,
-			itemId:        10,
+			name:          "Invalid cartID",
+			cartID:        -1,
+			itemID:        10,
 			expectedError: e.ErrRemove,
 		},
 		{
-			name:          "Invalid itemId",
-			cartId:        1,
-			itemId:        -1,
+			name:          "Invalid itemID",
+			cartID:        1,
+			itemID:        -1,
 			expectedError: e.ErrRemove,
 		},
 	}
@@ -105,7 +106,7 @@ func TestCartService_RemoveItem(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := cs.RemoveItem(context.Background(), tt.cartId, tt.itemId)
+			err := cs.RemoveItem(context.Background(), tt.cartID, tt.itemID)
 			if err != nil {
 				assert.Equal(t, tt.expectedError, err)
 			}

@@ -67,6 +67,10 @@ func (c CartService) RemoveItem(ctx context.Context, cartID, itemID int) error {
 func (c CartService) GetCart(ctx context.Context, cartID int) (*models.Cart, error) {
 	cart, err := postgres.GetCart(ctx, c.Pool, cartID)
 	if err != nil {
+		return nil, e.ErrDB
+	}
+
+	if cart.ID == -1 {
 		return nil, e.ErrInvalidCartID
 	}
 

@@ -206,7 +206,7 @@ func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	cart, err := hh.cartService.GetCart(r.Context(), cartID)
 	if err != nil {
-		handleError(w, err)
+		resp := handleError(w, err)
 
 		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {

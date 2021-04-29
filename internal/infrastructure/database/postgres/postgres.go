@@ -76,12 +76,23 @@ func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, er
 
 	var cart models.Cart
 
+	var rowsCount int
+
 	conn, err := p.Acquire(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	defer conn.Release()
+
+	err = conn.QueryRow(ctx, "SELECT COUNT(*) FROM items WHERE cartID=$1", cartID).Scan(&rowsCount)
+	if err != nil {
+		return nil, err
+	}
+
+	if rowsCount <= 0 {
+		return &models.Cart{ID: -1}, nil
+	}
 
 	rows, err := conn.Query(ctx, "SELECT id, cartId, product_name, quantity FROM items WHERE cartID=$1", cartID)
 	if err != nil {
