@@ -6,9 +6,28 @@ import (
 	"github.com/fedo3nik/cart-go-api/internal/domain/models"
 	e "github.com/fedo3nik/cart-go-api/internal/errors"
 	"github.com/fedo3nik/cart-go-api/internal/infrastructure/database/postgres"
+
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 )
 
+// Cart is the interface that describes methods for the service layer.
+//
+// CreateCart creates a new cart.
+// Returns a pointer to the cart model.
+// Also it returns a database error if the used func InsertCart returns an error.
+//
+// AddItem adds a new item to the cart.
+// Returns a pointer to the item model.
+// Also it returns an error if the item data is invalid or
+// the cart with the same id doesn't exist.
+//
+// RemoveItem removes item from the cart.
+// Returns an error if cart or item with the received IDs doesn't exist.
+//
+// GetCart gets the data about the cart with the ID == cartID.
+// Returns a pointer to the cart model.
+// Also it returns an error if the cart with the same ID doesn't exist.
 type Cart interface {
 	CreateCart(ctx context.Context) (*models.Cart, error)
 	AddItem(ctx context.Context, product string, quantity, cartID int) (*models.CartItem, error)
@@ -16,8 +35,9 @@ type Cart interface {
 	GetCart(ctx context.Context, cartID int) (*models.Cart, error)
 }
 
+// A CartService represents service layer.
 type CartService struct {
-	Pool *pgxpool.Pool
+	Pool *pgxpool.Pool // connection pool
 }
 
 func (c CartService) CreateCart(ctx context.Context) (*models.Cart, error) {
@@ -25,7 +45,7 @@ func (c CartService) CreateCart(ctx context.Context) (*models.Cart, error) {
 
 	id, err := postgres.InsertCart(ctx, c.Pool)
 	if err != nil {
-		return nil, e.ErrDB
+		return nil, errors.Wrap(e.ErrDB, err.Error())
 	}
 
 	cart.ID = id
@@ -54,10 +74,10 @@ func (c CartService) AddItem(ctx context.Context, product string, quantity, cart
 func (c CartService) RemoveItem(ctx context.Context, cartID, itemID int) error {
 	flag, err := postgres.DeleteItem(ctx, c.Pool, cartID, itemID)
 	if err != nil {
-		return e.ErrDB
+		return errors.Wrap(e.ErrDB, err.Error())
 	}
 
-	if !flag {
+	if flag {
 		return e.ErrRemove
 	}
 
@@ -67,7 +87,7 @@ func (c CartService) RemoveItem(ctx context.Context, cartID, itemID int) error {
 func (c CartService) GetCart(ctx context.Context, cartID int) (*models.Cart, error) {
 	cart, err := postgres.GetCart(ctx, c.Pool, cartID)
 	if err != nil {
-		return nil, e.ErrDB
+		return nil, errors.Wrap(e.ErrDB, err.Error())
 	}
 
 	if cart.ID == -1 {

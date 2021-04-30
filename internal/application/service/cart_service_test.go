@@ -2,17 +2,18 @@ package service
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/fedo3nik/cart-go-api/internal/config"
 	e "github.com/fedo3nik/cart-go-api/internal/errors"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCartService_AddItem(t *testing.T) {
-	tests := []struct {
+	tt := []struct {
 		name           string
 		product        string
 		cartID         int
@@ -47,32 +48,30 @@ func TestCartService_AddItem(t *testing.T) {
 	}
 
 	c, err := config.NewConfig()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pool, err := pgxpool.Connect(context.Background(), c.PostgresURL)
-	if err != nil {
-		log.Fatalf("Connect to database error: %v", err)
-	}
+	require.NoError(t, err)
 
 	cs := NewCartService(pool)
 
-	for _, tt := range tests {
-		tt := tt
+	for _, tc := range tt {
+		tc := tc
 
-		t.Run(tt.name, func(t *testing.T) {
-			item, err := cs.AddItem(context.Background(), tt.product, tt.quantity, tt.cartID)
+		t.Run(tc.name, func(t *testing.T) {
+			item, err := cs.AddItem(context.Background(), tc.product, tc.quantity, tc.cartID)
 			if err != nil {
-				assert.Equal(t, tt.expectedError, err)
+				assert.Equal(t, tc.expectedError, err)
 				return
 			}
 
-			assert.Equal(t, tt.expectedResult, item.Product)
+			assert.Equal(t, tc.expectedResult, item.Product)
 		})
 	}
 }
 
 func TestCartService_RemoveItem(t *testing.T) {
-	tests := []struct {
+	tt := []struct {
 		name          string
 		cartID        int
 		itemID        int
@@ -93,22 +92,20 @@ func TestCartService_RemoveItem(t *testing.T) {
 	}
 
 	c, err := config.NewConfig()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pool, err := pgxpool.Connect(context.Background(), c.PostgresURL)
-	if err != nil {
-		log.Fatalf("Connect to database error: %v", err)
-	}
+	require.NoError(t, err)
 
 	cs := NewCartService(pool)
 
-	for _, tt := range tests {
-		tt := tt
+	for _, tc := range tt {
+		tc := tc
 
-		t.Run(tt.name, func(t *testing.T) {
-			err := cs.RemoveItem(context.Background(), tt.cartID, tt.itemID)
+		t.Run(tc.name, func(t *testing.T) {
+			err := cs.RemoveItem(context.Background(), tc.cartID, tc.itemID)
 			if err != nil {
-				assert.Equal(t, tt.expectedError, err)
+				assert.Equal(t, tc.expectedError, err)
 			}
 		})
 	}

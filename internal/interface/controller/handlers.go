@@ -3,30 +3,33 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/fedo3nik/cart-go-api/internal/domain/models"
-	"github.com/gorilla/mux"
-
 	"github.com/fedo3nik/cart-go-api/internal/application/service"
+	"github.com/fedo3nik/cart-go-api/internal/domain/models"
 	e "github.com/fedo3nik/cart-go-api/internal/errors"
 	dto "github.com/fedo3nik/cart-go-api/internal/interface/controller/dtohttp"
+
+	"github.com/gorilla/mux"
 )
 
+// A HTTPCreateCartHandler represents handler for CreateCart endpoint.
 type HTTPCreateCartHandler struct {
 	cartService service.Cart
 }
 
+// A HTTPAddItemHandler represents handler for AddItem endpoint.
 type HTTPAddItemHandler struct {
 	cartService service.Cart
 }
 
+// A HTTPRemoveItemHandler represents handler for RemoveItem endpoint.
 type HTTPRemoveItemHandler struct {
 	cartService service.Cart
 }
 
+// A HTTPGetCartHandler represents handler for GetCart endpoint.
 type HTTPGetCartHandler struct {
 	cartService service.Cart
 }
@@ -69,6 +72,10 @@ func NewHTTPCreateCartHandler(cartService service.Cart) *HTTPCreateCartHandler {
 	return &HTTPCreateCartHandler{cartService: cartService}
 }
 
+// ServeHTTP is a method to handle CreateCart endpoint.
+// It uses ResponseWriter and pointer to the Request from the standard package http.
+// For creating a Cart model used method CreateCart from the service layer.
+// Response write to the ResponseWriter using json.Encode().
 func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var resp dto.CartResponse
 
@@ -78,8 +85,6 @@ func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {
-			log.Printf("Encode error: %v", err)
-
 			return
 		}
 
@@ -91,7 +96,6 @@ func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
-		log.Printf("Encode error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return
@@ -102,10 +106,15 @@ func NewHTTPAddItemHandler(cartService service.Cart) *HTTPAddItemHandler {
 	return &HTTPAddItemHandler{cartService: cartService}
 }
 
+// ServeHTTP is a method to handle AddItem endpoint.
+// It uses ResponseWriter and pointer to the Request from the standard package http.
+// Data about the item received from the Request body using json.Decode(),
+// cartID received from the URL via func Vars() from the mux package.
+// For creating CartItem model used method AddItem from the service layer.
+// Response write to the ResponseWriter using json.Encode().
 func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
 	if err != nil {
-		log.Printf("Strconv err: %v", err)
 		return
 	}
 
@@ -115,7 +124,6 @@ func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Printf("Bad request: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 
 		return
@@ -127,8 +135,6 @@ func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {
-			log.Printf("Encode error: %v", err)
-
 			return
 		}
 
@@ -142,7 +148,6 @@ func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
-		log.Printf("Encode error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return
@@ -153,16 +158,18 @@ func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
 	return &HTTPRemoveItemHandler{cartService: cartService}
 }
 
+// ServeHTTP is a method to handle RemoveItem endpoint.
+// It uses ResponseWriter and pointer to the Request from the standard package http.
+// ItemID and cartID received from the URL via func Vars() from the mux package.
+// Response write to the ResponseWriter using json.Encode().
 func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
 	if err != nil {
-		log.Printf("Strconv err: %v", err)
 		return
 	}
 
 	itemID, err := strconv.Atoi(mux.Vars(r)["itemID"])
 	if err != nil {
-		log.Printf("Strconv err: %v", err)
 		return
 	}
 
@@ -174,7 +181,7 @@ func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {
-			log.Printf("Encode error: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
 
 			return
 		}
@@ -184,7 +191,6 @@ func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
-		log.Printf("Encode error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return
@@ -195,10 +201,14 @@ func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
 	return &HTTPGetCartHandler{cartService: cartService}
 }
 
+// ServeHTTP is a method to handle GetCart endpoint.
+// It uses ResponseWriter and pointer to the Request from the standard package http.
+// cartID received from the URL via func Vars() from the mux package.
+// Method GetCart used for received all the items from this cart.
+// Response write to the ResponseWriter using json.Encode().
 func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
 	if err != nil {
-		log.Printf("Strconv err: %v", err)
 		return
 	}
 
@@ -210,8 +220,6 @@ func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {
-			log.Printf("Encode error: %v", err)
-
 			return
 		}
 
@@ -223,7 +231,6 @@ func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
-		log.Printf("Encode error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
 		return

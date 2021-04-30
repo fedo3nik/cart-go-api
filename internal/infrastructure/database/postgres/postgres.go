@@ -2,12 +2,16 @@ package postgres
 
 import (
 	"context"
-	"log"
 
 	"github.com/fedo3nik/cart-go-api/internal/domain/models"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+// InsertCart inserts a new Cart in the DB.
+// Returns the ID of a new cart.
+// Also it returns an error if the connection from the connection pool doesn't acquired or
+// if a new cart doesn't inserted in the table.
 func InsertCart(ctx context.Context, p *pgxpool.Pool) (int, error) {
 	var id int
 
@@ -22,13 +26,16 @@ func InsertCart(ctx context.Context, p *pgxpool.Pool) (int, error) {
 
 	err = row.Scan(&id)
 	if err != nil {
-		log.Printf("Scan error: %v", err)
 		return 0, err
 	}
 
 	return id, nil
 }
 
+// InsertItem inserts a new CartItem in the DB.
+// Returns the ID of a new item.
+// Also it returns an error if the connection from the connection pool doesn't acquire or
+// if a new item doesn't inserted in the table.
 func InsertItem(ctx context.Context, p *pgxpool.Pool, item *models.CartItem) (int, error) {
 	var id int
 
@@ -44,33 +51,40 @@ func InsertItem(ctx context.Context, p *pgxpool.Pool, item *models.CartItem) (in
 
 	err = row.Scan(&id)
 	if err != nil {
-		log.Printf("Scan error: %v", err)
 		return 0, err
 	}
 
 	return id, nil
 }
 
+// DeleteItem deletes a CartItem from the cart in the DB.
+// Returns the bool value that flagged item was deleted or no.
+// Also it returns an error if the connection from the connection pool doesn't acquire or
+// if the item doesn't deleted from the table.
 func DeleteItem(ctx context.Context, p *pgxpool.Pool, cartID, itemID int) (bool, error) {
 	conn, err := p.Acquire(ctx)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	defer conn.Release()
 
 	ct, err := conn.Exec(ctx, "DELETE FROM Items WHERE ID=$1 AND cartID=$2", itemID, cartID)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	if ct.RowsAffected() != 1 {
-		return false, nil
+		return true, nil
 	}
 
-	return true, nil
+	return false, nil
 }
 
+// GetCart selects all the items in the Cart from the DB.
+// Returns pointer to the Cart model with the data.
+// Also it returns an error if the connection from the connection pool doesn't acquire or
+// if the error occurred while reading rows or if the cart doesn't selected from the table.
 func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, error) {
 	var items []models.CartItem
 
@@ -110,6 +124,10 @@ func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, er
 		}
 
 		items = append(items, item)
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 
 	cart.ID = cartID

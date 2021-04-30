@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/fedo3nik/cart-go-api/internal/application/service"
+	"github.com/fedo3nik/cart-go-api/internal/config"
 	"github.com/fedo3nik/cart-go-api/internal/interface/controller"
 
-	"github.com/fedo3nik/cart-go-api/internal/config"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -24,8 +24,6 @@ func main() {
 		log.Fatalf("Connect to database error: %v", err)
 	}
 
-	defer pool.Close()
-
 	handler := mux.NewRouter()
 
 	cartService := service.NewCartService(pool)
@@ -35,13 +33,13 @@ func main() {
 	removeItemHandler := controller.NewHTTPRemoveItemHandler(cartService)
 	getCartHandler := controller.NewHTTPGetCartHandler(cartService)
 
-	handler.Handle("/carts", createCartHandler).Methods("POST")
-	handler.Handle("/carts/{cartID}/items", addItemHandler).Methods("POST")
-	handler.Handle("/carts/{cartID}/items/{itemID}", removeItemHandler).Methods("DELETE")
+	handler.Handle("/carts", createCartHandler).Methods(http.MethodPost)
+	handler.Handle("/carts/{cartID}/items", addItemHandler).Methods(http.MethodPost)
+	handler.Handle("/carts/{cartID}/items/{itemID}", removeItemHandler).Methods(http.MethodDelete)
 	handler.Handle("/carts/{cartID}", getCartHandler)
 
 	err = http.ListenAndServe(c.Host+c.Port, handler)
 	if err != nil {
-		log.Panicf("Listen & Serve error: %v", err)
+		log.Fatalf("Listen & Serve error: %v", err)
 	}
 }
