@@ -4,12 +4,14 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// A Config represents envs from the config.env file.
 type Config struct {
-	PostgresURL string `envconfig:"POSTGRES_URL"`
-	Host        string `envconfig:"CART_HOST"`
-	Port        string `envconfig:"CART_PORT"`
+	PostgresURL string `envconfig:"POSTGRES_URL"` // PostgresURL is database connection string
+	Host        string `envconfig:"CART_HOST"`    // Host is an application IP address
+	Port        string `envconfig:"CART_PORT"`    // Port is an application port
 }
 
+// NewConfig is a constructor for Config struct.
 func NewConfig() (*Config, error) {
 	var c Config
 

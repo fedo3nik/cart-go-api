@@ -1,4 +1,4 @@
-package models
+package model
 
 // A Cart represents shopping cart in the online store.
 type Cart struct {

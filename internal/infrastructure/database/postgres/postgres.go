@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"github.com/fedo3nik/cart-go-api/internal/domain/models"
+	"github.com/fedo3nik/cart-go-api/internal/domain/model"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -36,7 +36,7 @@ func InsertCart(ctx context.Context, p *pgxpool.Pool) (int, error) {
 // Returns the ID of a new item.
 // Also it returns an error if the connection from the connection pool doesn't acquire or
 // if a new item doesn't inserted in the table.
-func InsertItem(ctx context.Context, p *pgxpool.Pool, item *models.CartItem) (int, error) {
+func InsertItem(ctx context.Context, p *pgxpool.Pool, item *model.CartItem) (int, error) {
 	var id int
 
 	conn, err := p.Acquire(ctx)
@@ -85,10 +85,10 @@ func DeleteItem(ctx context.Context, p *pgxpool.Pool, cartID, itemID int) (bool,
 // Returns pointer to the Cart model with the data.
 // Also it returns an error if the connection from the connection pool doesn't acquire or
 // if the error occurred while reading rows or if the cart doesn't selected from the table.
-func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, error) {
-	var items []models.CartItem
+func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*model.Cart, error) {
+	var items []model.CartItem
 
-	var cart models.Cart
+	var cart model.Cart
 
 	var rowsCount int
 
@@ -99,13 +99,13 @@ func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, er
 
 	defer conn.Release()
 
-	err = conn.QueryRow(ctx, "SELECT COUNT(*) FROM items WHERE cartID=$1", cartID).Scan(&rowsCount)
+	err = conn.QueryRow(ctx, "SELECT COUNT(*) FROM carts WHERE ID=$1", cartID).Scan(&rowsCount)
 	if err != nil {
 		return nil, err
 	}
 
 	if rowsCount <= 0 {
-		return &models.Cart{ID: -1}, nil
+		return &model.Cart{ID: -1}, nil
 	}
 
 	rows, err := conn.Query(ctx, "SELECT id, cartId, product_name, quantity FROM items WHERE cartID=$1", cartID)
@@ -116,7 +116,7 @@ func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, er
 	defer rows.Close()
 
 	for rows.Next() {
-		var item models.CartItem
+		var item model.CartItem
 
 		err = rows.Scan(&item.ID, &item.CartID, &item.Product, &item.Quantity)
 		if err != nil {
@@ -131,7 +131,11 @@ func GetCart(ctx context.Context, p *pgxpool.Pool, cartID int) (*models.Cart, er
 	}
 
 	cart.ID = cartID
-	cart.Items = items
+	if items != nil {
+		cart.Items = items
+	} else {
+		cart.Items = []model.CartItem{}
+	}
 
 	return &cart, nil
 }

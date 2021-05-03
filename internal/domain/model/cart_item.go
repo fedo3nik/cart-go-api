@@ -1,4 +1,4 @@
-package models
+package model
 
 // A CartItem represents items added to cart.
 type CartItem struct {

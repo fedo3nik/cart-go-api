@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/fedo3nik/cart-go-api/internal/application/service"
-	"github.com/fedo3nik/cart-go-api/internal/domain/models"
+	"github.com/fedo3nik/cart-go-api/internal/domain/model"
 	e "github.com/fedo3nik/cart-go-api/internal/errors"
 	dto "github.com/fedo3nik/cart-go-api/internal/interface/controller/dtohttp"
 
@@ -68,6 +68,7 @@ func handleError(w http.ResponseWriter, err error) *dto.ErrorResponse {
 	return nil
 }
 
+// NewHTTPCreateCartHandler is a constructor for HTTPCreateCartHandler struct.
 func NewHTTPCreateCartHandler(cartService service.Cart) *HTTPCreateCartHandler {
 	return &HTTPCreateCartHandler{cartService: cartService}
 }
@@ -92,7 +93,7 @@ func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 
 	resp.ID = cart.ID
-	resp.Items = []models.CartItem{}
+	resp.Items = []model.CartItem{}
 
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
@@ -102,6 +103,7 @@ func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// NewHTTPAddItemHandler is a constructor for HTTPAddItemHandler struct.
 func NewHTTPAddItemHandler(cartService service.Cart) *HTTPAddItemHandler {
 	return &HTTPAddItemHandler{cartService: cartService}
 }
@@ -113,7 +115,9 @@ func NewHTTPAddItemHandler(cartService service.Cart) *HTTPAddItemHandler {
 // For creating CartItem model used method AddItem from the service layer.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
+	strCartID := mux.Vars(r)["cartID"]
+
+	cartID, err := strconv.Atoi(strCartID)
 	if err != nil {
 		return
 	}
@@ -154,6 +158,7 @@ func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// NewHTTPRemoveItemHandler is a constructor for HTTPRemoveItemHandler struct.
 func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
 	return &HTTPRemoveItemHandler{cartService: cartService}
 }
@@ -163,12 +168,15 @@ func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
 // ItemID and cartID received from the URL via func Vars() from the mux package.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
+	strCartID := mux.Vars(r)["cartID"]
+	strItemID := mux.Vars(r)["itemID"]
+
+	cartID, err := strconv.Atoi(strCartID)
 	if err != nil {
 		return
 	}
 
-	itemID, err := strconv.Atoi(mux.Vars(r)["itemID"])
+	itemID, err := strconv.Atoi(strItemID)
 	if err != nil {
 		return
 	}
@@ -197,6 +205,7 @@ func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// NewHTTPGetCartHandler is a constructor for HTTPGetCartHandler struct.
 func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
 	return &HTTPGetCartHandler{cartService: cartService}
 }
@@ -207,7 +216,9 @@ func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
 // Method GetCart used for received all the items from this cart.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	cartID, err := strconv.Atoi(mux.Vars(r)["cartID"])
+	strCartID := mux.Vars(r)["cartID"]
+
+	cartID, err := strconv.Atoi(strCartID)
 	if err != nil {
 		return
 	}
