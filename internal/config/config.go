@@ -4,7 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-// A Config represents envs from the config.env file.
+// Config represents envs from the config.env file.
 type Config struct {
 	PostgresURL string `envconfig:"POSTGRES_URL"` // PostgresURL is database connection string
 	Host        string `envconfig:"CART_HOST"`    // Host is an application IP address

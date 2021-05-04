@@ -19,7 +19,7 @@ type Cart interface {
 	GetCart(ctx context.Context, cartID int) (*model.Cart, error)
 }
 
-// A CartService represents service layer.
+// CartService represents service layer.
 type CartService struct {
 	Pool *pgxpool.Pool // connection pool
 }
@@ -47,14 +47,14 @@ func (c CartService) CreateCart(ctx context.Context) (*model.Cart, error) {
 func (c CartService) AddItem(ctx context.Context, product string, quantity, cartID int) (*model.CartItem, error) {
 	err := c.ValidateItemData(product, quantity)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, err.Error())
 	}
 
 	item := model.CartItem{Product: product, Quantity: quantity, CartID: cartID}
 
 	id, err := postgres.InsertItem(ctx, c.Pool, &item)
 	if err != nil {
-		return nil, e.ErrInvalidCartID
+		return nil, errors.Wrap(e.ErrInvalidCartID, err.Error())
 	}
 
 	item.ID = id

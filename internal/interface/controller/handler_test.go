@@ -2,10 +2,6 @@ package controller
 
 import (
 	"context"
-	"github.com/fedo3nik/cart-go-api/internal/domain/model"
-	"github.com/fedo3nik/cart-go-api/internal/infrastructure/database/postgres"
-	controller "github.com/fedo3nik/cart-go-api/internal/interface/controller/dtohttp"
-	"github.com/gavv/httpexpect/v2"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -13,6 +9,11 @@ import (
 
 	"github.com/fedo3nik/cart-go-api/internal/application/service"
 	"github.com/fedo3nik/cart-go-api/internal/config"
+	"github.com/fedo3nik/cart-go-api/internal/domain/model"
+	"github.com/fedo3nik/cart-go-api/internal/infrastructure/database/postgres"
+	controller "github.com/fedo3nik/cart-go-api/internal/interface/controller/dtohttp"
+
+	"github.com/gavv/httpexpect/v2"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/stretchr/testify/require"
 )
@@ -92,7 +93,6 @@ func TestHTTPGetCartHandler_ServeHTTP(t *testing.T) {
 	e := httpexpect.New(t, server.URL)
 
 	e.GET("/carts/1").Expect().Status(http.StatusOK).Body().Empty()
-
 }
 
 func TestHTTPRemoveItemHandler_ServeHTTP(t *testing.T) {
@@ -103,6 +103,7 @@ func TestHTTPRemoveItemHandler_ServeHTTP(t *testing.T) {
 	require.NoError(t, err)
 
 	id, err := postgres.InsertItem(context.Background(), pool, &model.CartItem{CartID: 3})
+	require.NoError(t, err)
 
 	itemID := strconv.Itoa(id)
 

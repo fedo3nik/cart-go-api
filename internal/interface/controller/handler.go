@@ -14,22 +14,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// A HTTPCreateCartHandler represents handler for CreateCart endpoint.
+// HTTPCreateCartHandler represents handler for CreateCart endpoint.
 type HTTPCreateCartHandler struct {
 	cartService service.Cart
 }
 
-// A HTTPAddItemHandler represents handler for AddItem endpoint.
+// HTTPAddItemHandler represents handler for AddItem endpoint.
 type HTTPAddItemHandler struct {
 	cartService service.Cart
 }
 
-// A HTTPRemoveItemHandler represents handler for RemoveItem endpoint.
+// HTTPRemoveItemHandler represents handler for RemoveItem endpoint.
 type HTTPRemoveItemHandler struct {
 	cartService service.Cart
 }
 
-// A HTTPGetCartHandler represents handler for GetCart endpoint.
+// HTTPGetCartHandler represents handler for GetCart endpoint.
 type HTTPGetCartHandler struct {
 	cartService service.Cart
 }

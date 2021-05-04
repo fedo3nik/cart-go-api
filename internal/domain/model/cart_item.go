@@ -1,6 +1,6 @@
 package model
 
-// A CartItem represents items added to cart.
+// CartItem represents items added to cart.
 type CartItem struct {
 	ID       int    // ID of the item
 	CartID   int    // Cart ID to which this item was added
