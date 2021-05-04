@@ -80,6 +80,8 @@ func NewHTTPCreateCartHandler(cartService service.Cart) *HTTPCreateCartHandler {
 func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var resp dto.CartResponse
 
+	w.Header().Set("Content-Type", "application/json")
+
 	cart, err := hh.cartService.CreateCart(r.Context())
 	if err != nil {
 		resp := handleError(w, err)
@@ -115,6 +117,8 @@ func NewHTTPAddItemHandler(cartService service.Cart) *HTTPAddItemHandler {
 // For creating CartItem model used method AddItem from the service layer.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPAddItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	strCartID := mux.Vars(r)["cartID"]
 
 	cartID, err := strconv.Atoi(strCartID)
@@ -168,6 +172,8 @@ func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
 // ItemID and cartID received from the URL via func Vars() from the mux package.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	strCartID := mux.Vars(r)["cartID"]
 	strItemID := mux.Vars(r)["itemID"]
 
@@ -216,6 +222,8 @@ func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
 // Method GetCart used for received all the items from this cart.
 // Response write to the ResponseWriter using json.Encode().
 func (hh HTTPGetCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	strCartID := mux.Vars(r)["cartID"]
 
 	cartID, err := strconv.Atoi(strCartID)
