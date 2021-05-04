@@ -1,4 +1,4 @@
-.PHONY: go_lint postgres_run migrate_up migrate_down
+.PHONY: go_lint postgres_run migrate_up migrate_down swagger_spec swagger_ui
 
 go_lint:
 	docker run --rm -v ${PWD}:/app -w /app/ golangci/golangci-lint:v1.36-alpine golangci-lint run -v --timeout=5m
@@ -11,3 +11,9 @@ migrate_up:
 
 migrate_down:
 	migrate -source file://internal/infrastructure/database/migrations/ -database "postgresql://postgres:password@localhost:5432/cart_api?sslmode=disable" down
+
+swagger_spec:
+	swagger generate spec -o ./swagger.yml
+
+swagger_ui:
+	swagger serve -F=swagger swagger.yml

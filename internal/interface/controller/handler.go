@@ -73,6 +73,12 @@ func NewHTTPCreateCartHandler(cartService service.Cart) *HTTPCreateCartHandler {
 	return &HTTPCreateCartHandler{cartService: cartService}
 }
 
+// swagger:route POST /carts carts createCart
+// Returns a new cart
+// responses:
+//	200: createCartResponse
+//  502: errorResponse
+
 // ServeHTTP is a method to handle CreateCart endpoint.
 // It uses ResponseWriter and pointer to the Request from the standard package http.
 // For creating a Cart model used method CreateCart from the service layer.
@@ -109,6 +115,13 @@ func (hh HTTPCreateCartHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 func NewHTTPAddItemHandler(cartService service.Cart) *HTTPAddItemHandler {
 	return &HTTPAddItemHandler{cartService: cartService}
 }
+
+// swagger:route POST /carts/{cartID}/items items addItem
+// Returns a new cartItem
+// responses:
+//	200: addItemResponse
+//	400: errorResponse
+//	502: errorResponse
 
 // ServeHTTP is a method to handle AddItem endpoint.
 // It uses ResponseWriter and pointer to the Request from the standard package http.
@@ -167,6 +180,13 @@ func NewHTTPRemoveItemHandler(cartService service.Cart) *HTTPRemoveItemHandler {
 	return &HTTPRemoveItemHandler{cartService: cartService}
 }
 
+// swagger:route DELETE /carts/{cartID}/items/{itemID} items removeItem
+// Returns empty json Object
+// responses:
+//	200: removeItemResponse
+//	400: errorResponse
+//	502: errorResponse
+
 // ServeHTTP is a method to handle RemoveItem endpoint.
 // It uses ResponseWriter and pointer to the Request from the standard package http.
 // ItemID and cartID received from the URL via func Vars() from the mux package.
@@ -215,6 +235,13 @@ func (hh HTTPRemoveItemHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 func NewHTTPGetCartHandler(cartService service.Cart) *HTTPGetCartHandler {
 	return &HTTPGetCartHandler{cartService: cartService}
 }
+
+// swagger:route GET /carts/{cartID} carts getCart
+// Returns cart with the items in it
+// responses:
+//	200: getCartResponse
+//	400: errorResponse
+//	502: errorResponse
 
 // ServeHTTP is a method to handle GetCart endpoint.
 // It uses ResponseWriter and pointer to the Request from the standard package http.

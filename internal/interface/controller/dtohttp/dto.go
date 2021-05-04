@@ -2,7 +2,7 @@ package controller
 
 import "github.com/fedo3nik/cart-go-api/internal/domain/model"
 
-// CartResponse represents json response for the CreateCart handler.
+// CartResponse represents json response for the CreateCart and GetCart handlers.
 type CartResponse struct {
 	ID    int              `json:"id"`    // Cart ID
 	Items []model.CartItem `json:"items"` // Items in the cart

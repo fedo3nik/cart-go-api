@@ -1,0 +1,171 @@
+basePath: /
+consumes:
+- application/json
+definitions:
+  CartItem:
+    properties:
+      CartID:
+        format: int64
+        type: integer
+      ID:
+        format: int64
+        type: integer
+      Product:
+        type: string
+      Quantity:
+        format: int64
+        type: integer
+    title: CartItem represents items added to cart.
+    type: object
+    x-go-package: github.com/fedo3nik/cart-go-api/internal/domain/model
+info:
+  description: Documentation for Cart API
+  title: Cart API
+  version: 1.0.0
+paths:
+  /carts:
+    post:
+      description: Returns a new cart
+      operationId: createCart
+      responses:
+        "200":
+          $ref: '#/responses/createCartResponse'
+        "502":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - carts
+  /carts/{cartID}:
+    get:
+      description: Returns cart with the items in it
+      operationId: getCart
+      parameters:
+      - example: 1
+        format: int64
+        in: path
+        name: CartID
+        required: true
+        type: integer
+      responses:
+        "200":
+          $ref: '#/responses/getCartResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "502":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - carts
+  /carts/{cartID}/items:
+    post:
+      description: Returns a new cartItem
+      operationId: addItem
+      parameters:
+      - example: 1
+        format: int64
+        in: path
+        name: CartID
+        required: true
+        type: integer
+      - example: '"Hat"'
+        in: body
+        name: product
+        schema:
+          type: string
+        x-go-name: Product
+      - example: "10"
+        in: body
+        name: quantity
+        schema:
+          format: int64
+          type: integer
+        x-go-name: Quantity
+      responses:
+        "200":
+          $ref: '#/responses/addItemResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "502":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - items
+  /carts/{cartID}/items/{itemID}:
+    delete:
+      description: Returns empty json Object
+      operationId: removeItem
+      parameters:
+      - example: 3
+        format: int64
+        in: path
+        name: CartID
+        required: true
+        type: integer
+      - example: 5
+        format: int64
+        in: path
+        name: ItemID
+        required: true
+        type: integer
+      responses:
+        "200":
+          $ref: '#/responses/removeItemResponse'
+        "400":
+          $ref: '#/responses/errorResponse'
+        "502":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - items
+produces:
+- application/json
+responses:
+  addItemResponse:
+    description: CartItem added into the cart successfully
+    headers:
+      cart_id:
+        description: CartID in which item was placed
+        format: int64
+        type: integer
+      id:
+        description: ID of the new cartItem
+        format: int64
+        type: integer
+      product:
+        description: Product title
+        type: string
+      quantity:
+        description: Quantity of the products in the cartItem
+        format: int64
+        type: integer
+  createCartResponse:
+    description: New cart created successfully
+    headers:
+      id:
+        description: ID of the new cart
+        format: int64
+        type: integer
+      items:
+        description: Empty array of cartItems
+        items:
+          $ref: '#/definitions/CartItem'
+        type: array
+  errorResponse:
+    description: Error caused
+    headers:
+      message:
+        description: Error message
+        type: string
+  getCartResponse:
+    description: The cart with the items in it
+    headers:
+      id:
+        description: ID of the new cart
+        format: int64
+        type: integer
+      items:
+        description: Array of items placed in the cart
+        items:
+          $ref: '#/definitions/CartItem'
+        type: array
+  removeItemResponse:
+    description: CartItem removed from the cart successfully
+schemes:
+- http
+swagger: "2.0"
